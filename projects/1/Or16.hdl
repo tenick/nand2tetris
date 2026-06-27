@@ -1,0 +1,74 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/Or16.hdl
+/**
+ * 16-bit Or gate:
+ * for i = 0, ..., 15:
+ * out[i] = a[i] Or b[i] 
+ */
+CHIP Or16 {
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    Not16(in=a, out[0]=notA0, 
+                out[1]=notA1,
+                out[2]=notA2,
+                out[3]=notA3,
+
+                out[4]=notA4,
+                out[5]=notA5,
+                out[6]=notA6,
+                out[7]=notA7,
+
+                out[8]=notA8,
+                out[9]=notA9,
+                out[10]=notA10,
+                out[11]=notA11,
+
+                out[12]=notA12,
+                out[13]=notA13,
+                out[14]=notA14,
+                out[15]=notA15);
+
+    Not16(in=b, out[0]=notB0, 
+                out[1]=notB1,
+                out[2]=notB2,
+                out[3]=notB3,
+
+                out[4]=notB4,
+                out[5]=notB5,
+                out[6]=notB6,
+                out[7]=notB7,
+
+                out[8]=notB8,
+                out[9]=notB9,
+                out[10]=notB10,
+                out[11]=notB11,
+
+                out[12]=notB12,
+                out[13]=notB13,
+                out[14]=notB14,
+                out[15]=notB15);
+
+    Nand(a=notA0, b=notB0, out=out[0]);
+    Nand(a=notA1, b=notB1, out=out[1]);
+    Nand(a=notA2, b=notB2, out=out[2]);
+    Nand(a=notA3, b=notB3, out=out[3]);
+
+    Nand(a=notA4, b=notB4, out=out[4]);
+    Nand(a=notA5, b=notB5, out=out[5]);
+    Nand(a=notA6, b=notB6, out=out[6]);
+    Nand(a=notA7, b=notB7, out=out[7]);
+
+    Nand(a=notA8, b=notB8, out=out[8]);
+    Nand(a=notA9, b=notB9, out=out[9]);
+    Nand(a=notA10, b=notB10, out=out[10]);
+    Nand(a=notA11, b=notB11, out=out[11]);
+
+    Nand(a=notA12, b=notB12, out=out[12]);
+    Nand(a=notA13, b=notB13, out=out[13]);
+    Nand(a=notA14, b=notB14, out=out[14]);
+    Nand(a=notA15, b=notB15, out=out[15]);
+}
