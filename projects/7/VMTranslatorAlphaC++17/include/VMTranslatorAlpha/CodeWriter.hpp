@@ -6,7 +6,7 @@
 #include "MemorySegment.hpp"
 
 #include <fstream>
-#include <span>
+#include <vector>
 #include <string>
 
 namespace VMTranslator {
@@ -23,7 +23,7 @@ namespace VMTranslator {
         void writePop(const std::string&, int);
         void writePushPop(CommandType, MemorySegment, int);
         void writeComp(LogicCommand);
-        void writeAsmLines(std::span<const char* const>);
+        void writeAsmLines(const std::vector<std::string_view>&);
         std::ofstream outFile_;
         std::string inFileName_{};
         std::string outFilePath_{};
