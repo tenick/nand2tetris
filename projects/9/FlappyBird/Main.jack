@@ -1,0 +1,14 @@
+/**
+ * Entry point for the Flappy Bird game.
+ */
+class Main {
+    function void main() {
+        var GameController game;
+
+        let game = GameController.new();
+        do game.gameLoop();
+        do game.dispose();
+
+        return;
+    }
+}

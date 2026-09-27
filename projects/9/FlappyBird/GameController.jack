@@ -1,0 +1,170 @@
+/**
+ * Controls the game flow, including menus, difficulty selection, game loops,
+ * and game-over handling.
+ */
+class GameController {
+    field FlappyBirdGame flappyBirdGame;  // Current Flappy Bird game instance
+    field int gapSize;                    // Current pipe gap size
+    field int rngSeed;                    // Random number generator seed
+    field int delay;                      // Delay between game updates
+
+    constructor GameController new() {
+        let gapSize = 90;
+        let rngSeed = 1337;
+        let delay = 6;
+        return this;
+    }
+
+    /** Runs the main game loop and handles menus, difficulty selection, and game restarts */
+    method void gameLoop() {
+        var char key;
+        var bool quit, chooseDiff;
+
+        // Start screen
+        do drawStartScreen();
+
+        let key = 0;
+        while (~(key=128)) {
+            let key = Keyboard.keyPressed();
+        }
+
+        // Choose difficulty screen
+        let chooseDiff = true;
+        while (chooseDiff) {
+            do drawChooseDifficultyScreen();
+            let key = 0;
+            while (~(key=49) & ~(key=50) & ~(key=51)) {
+                let key = Keyboard.keyPressed();
+                // Key 1 = easy difficulty
+                if (key = 49) {
+                    let gapSize = 100;
+                    let delay = 6;
+                }
+                if (key = 50) {
+                    let gapSize = 90;
+                    let delay = 6;
+                }
+                if (key = 51) {
+                    let gapSize = 80;
+                    let delay = 5;
+                }
+            }
+
+            let quit = false;
+            while (~quit) {
+                // flappy bird game
+                do LCGRandom.setSeed(rngSeed);
+
+                do Screen.clearScreen();
+
+                if (flappyBirdGame = null) {
+                    let flappyBirdGame = FlappyBirdGame.new(gapSize);
+                }
+                else {
+                    do flappyBirdGame.reset(gapSize);
+                }
+                while (flappyBirdGame.run()) {
+                    do Sys.wait(delay);
+                }
+
+                // game over screen
+                do drawGameOverScreen(flappyBirdGame.getScore());
+
+                let key = 0;
+                while (~(key=128)
+                     & ~(key=81) & ~(key=113) 
+                     & ~(key=68) & ~(key=100)) {
+                    let key = Keyboard.keyPressed();
+                    // Q/q = quit
+                    if ((key = 81) | (key = 113)) {
+                        let quit = true;
+                        let chooseDiff = false;
+                    }
+                    // D/d = change difficulty
+                    if ((key = 68) | (key = 100)) {
+                        let quit = true;
+                    }
+                }
+            }
+        }
+
+        return;
+    }
+
+    /** Draws the game start screen */
+    method void drawStartScreen() {
+        var int x, y;
+        let x = 10;
+        let y = 100;
+
+	    do Screen.clearScreen();
+        do Output.moveCursor(10,25);
+        do Utils.drawF(x, y);
+        do Utils.drawL(x+1, y);
+        do Utils.drawA(x+2, y);
+        do Utils.drawP(x+3, y);
+        do Utils.drawP(x+4, y);
+        do Utils.drawY(x+5, y);
+        do Utils.drawB(x+7, y);
+        do Utils.drawI(x+8, y);
+        do Utils.drawR(x+9, y);
+        do Utils.drawD(x+10,y);
+
+        do Output.moveCursor(12,19);
+        do Output.printString("Press ENTER to continue...");
+
+        do Output.moveCursor(14,7);
+        do Output.printString("Originally created by Dong Nguyen (.GEARS) (C) 2013.");
+
+        do Output.moveCursor(15,5);
+        do Output.printString("Reimplemented in Nand2Tetris by Kenneth Usares (C) 2026.");
+
+        return;
+    }
+
+    /** Draws the difficulty selection screen */
+    method void drawChooseDifficultyScreen() {
+        do Screen.clearScreen();
+        do Output.moveCursor(10,21);
+        do Output.printString("Choose Difficulty:");
+
+        do Output.moveCursor(11,22);
+        do Output.printString("Press 1 (Easy)");
+
+        do Output.moveCursor(12,22);
+        do Output.printString("Press 2 (Medium)");
+
+        do Output.moveCursor(13,22);
+        do Output.printString("Press 3 (Hard)");
+
+        return;
+    }
+
+    /** Draws the game-over screen with the final score */
+    method void drawGameOverScreen(int score) {
+        do Output.moveCursor(10,23);
+        do Output.printString("Game Over!");
+
+        do Output.moveCursor(11,24);
+        do Output.printString("Score: ");
+        do Output.printInt(score);
+
+        do Output.moveCursor(13,15);
+        do Output.printString("Press ENTER to play again");
+
+        do Output.moveCursor(14,15);
+        do Output.printString("Press Q to quit");
+
+        do Output.moveCursor(15,15);
+        do Output.printString("Press D to change difficulty");
+
+        return;
+    }
+
+    /** Disposes the game resources and controller */
+    method void dispose() {
+        do flappyBirdGame.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

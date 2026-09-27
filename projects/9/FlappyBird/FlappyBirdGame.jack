@@ -1,0 +1,148 @@
+/**
+ * Controls the Flappy Bird game state, including the bird, pipes, and score.
+ * Handles game updates, collision detection, scoring, and resetting.
+ */
+class FlappyBirdGame {
+    field PipePair firstPipePair;
+    field Bird bird;
+    field int gapSize, score;
+
+    constructor FlappyBirdGame new(int gapSizeParam) {
+        let firstPipePair = PipePair.new(gapSizeParam);
+        let bird = Bird.new();
+
+        do reset(gapSizeParam);
+
+        return this;
+    }
+
+    /** Resets the game state, including the bird, pipes, and score */
+    method void reset(int gapSizeParam) {
+        let gapSize = gapSizeParam;
+        let score = 0;
+
+        do bird.reset();
+        do firstPipePair.reset(gapSizeParam, false, -1);
+
+        do Output.moveCursor(0, 0);
+        do Output.printInt(score);
+
+        return;
+    }
+
+    /** Runs one game update and returns false if the game has ended */
+    method bool run() {
+        // 1. move and draw the pipes
+        do movePipes();
+
+        // 2. move and draw the bird, if possible
+        if(~bird.move()) {
+            return false;
+        }
+
+        // 3. check if bird collide with any of the pipes
+        if (isBirdCollidingWithPipes()) {
+            return false;
+        }
+
+        // 4. check if bird passes a pipe pair
+        do didBirdPassPipePair();
+
+        // 5. draw score
+        do Output.moveCursor(0, 0);
+        do Output.printInt(score);
+
+        return true;
+    }
+
+    /** Moves all pipe pairs and removes pipes that have left the scene */
+    method bool movePipes() {
+        var PipePair currPipe, toDispose;
+
+        let currPipe = firstPipePair;
+
+        while (~(currPipe = null)) {
+            do currPipe.moveLeft();
+            let currPipe = currPipe.getNext();
+        }
+
+        // delete first pipe if already out of the scene
+        if (firstPipePair.isOutOfScene()) {
+            let toDispose = firstPipePair;
+            let firstPipePair = firstPipePair.getNext();
+            do toDispose.dispose();
+        }
+
+        return true;
+    }
+
+    /** Returns true if the bird is colliding with a pipe that has not yet been passed */
+    method bool isBirdCollidingWithPipes() {
+        var PipePair currPipe;
+
+        let currPipe = firstPipePair;
+
+        while (~(currPipe = null)) {
+            if (currPipe.isCollidingWith(
+                    bird.getX(), bird.getY(), 
+                    bird.getWidth(), bird.getHeight())) {
+                return true;
+            }
+            if (~currPipe.isPassed()) {
+                let currPipe = null;
+            }
+            else {
+                let currPipe = currPipe.getNext();
+            }
+        }
+
+        return false;
+    }
+
+    /** Checks whether the bird has passed the next unpassed pipe and updates the score */
+    method bool didBirdPassPipePair() {
+        var PipePair currPipe;
+
+        let currPipe = firstPipePair;
+
+        while (~(currPipe = null)) {
+            if (currPipe.isPassed()) {
+                let currPipe = currPipe.getNext();
+            }
+            else {
+                if (currPipe.isGapPassed(
+                        bird.getX(), bird.getY(), 
+                        bird.getWidth(), bird.getHeight())) {
+                    do currPipe.setIsPassed(true);
+                    let score = score + 1;
+                }
+                let currPipe = null;
+            }
+        }
+
+        return false;
+    }
+
+    /** Returns the current player score */
+    method int getScore() {
+        return score;
+    }
+
+    /** Disposes the game resources and all pipe pairs */
+    method void dispose() {
+        do bird.dispose();
+        do disposePipes(firstPipePair);
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Recursively dispose the PipePair linked list */
+    method void disposePipes(PipePair pipePair) {
+        if (pipePair = null) {
+            return;
+        }
+        do disposePipes(pipePair.getNext());
+        do pipePair.dispose();
+        return;
+    }
+}

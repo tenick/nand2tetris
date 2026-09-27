@@ -1,0 +1,297 @@
+/**
+ * Represents the bird (player).
+ */
+class Bird {
+    field int xPos;             // Horizontal position in screen memory words
+    field int yPos;             // Vertical position in screen pixels
+    field int width;            // Bird width in screen pixels
+    field int height;           // Bird height in screen pixels
+    field int currFlapStep;     // Current movement step
+    field int flapSteps;        // Total movement steps
+    field bool flapped;         // Whether the flap key is held
+    field bool flapping;        // Whether the bird is currently flapping
+    field Array downValues;     // Movement values while falling
+    field Array flapValues;     // Movement values while flapping
+
+    constructor Bird new() {
+        do reset();
+        let downValues = Array.new(flapSteps);
+        let flapValues = Array.new(flapSteps);
+
+        let downValues[0] = 1;
+        let downValues[1] = 1;
+        let downValues[2] = 1;
+        let downValues[3] = 1;
+        let downValues[4] = 1;
+        let downValues[5] = 1;
+        let downValues[6] = 1;
+        let downValues[7] = 1;
+        let downValues[8] = 1;
+        let downValues[9] = 1;
+        let downValues[10] = 1;
+        let downValues[11] = 1;
+        let downValues[12] = 1;
+        let downValues[13] = 2;
+        let downValues[14] = 2;
+        let downValues[15] = 2;
+        let downValues[16] = 2;
+        let downValues[17] = 2;
+        let downValues[18] = 2;
+        let downValues[19] = 2;
+
+        let flapValues[0] = -1;
+        let flapValues[1] = -1;
+        let flapValues[2] = -1;
+        let flapValues[3] = -1;
+        let flapValues[4] = -1;
+        let flapValues[5] = -2;
+        let flapValues[6] = -2;
+        let flapValues[7] = -2;
+        let flapValues[8] = -2;
+        let flapValues[9] = -2;
+        let flapValues[10] = -2;
+        let flapValues[11] = -2;
+        let flapValues[12] = -3;
+        let flapValues[13] = -3;
+        let flapValues[14] = -3;
+        let flapValues[15] = -3;
+        let flapValues[16] = -3;
+        let flapValues[17] = -3;
+        let flapValues[18] = -3;
+        let flapValues[19] = -3;
+
+        return this;
+    }
+
+    /** Resets the bird's position and movement state */
+    method void reset() {
+        let xPos = 5;
+        let yPos = 50;
+        let width = 32;
+        let height = 24;
+        let currFlapStep = 0;
+        let flapSteps = 20;
+
+        let flapped = false;
+        let flapping = false;
+
+        return;
+    }
+
+    /** Returns the bird's horizontal position in pixels */
+    method int getX() { return xPos*16; }
+
+    /** Returns the bird's vertical position in pixels */
+    method int getY() { return yPos; }
+
+    /** Returns the bird's width in pixels */
+    method int getWidth() { return width; }
+
+    /** Returns the bird's height in pixels */
+    method int getHeight() { return height; }
+
+    /** Moves the bird. Returns true if didn't hit ceiling or ground, otherwise returns false */
+    method bool move() {
+        var int delta;
+        var char key;
+
+        let key = Keyboard.keyPressed();
+
+        // check if bird is falling (not flapping)
+        if (~flapped & (key = 32)) {
+            let flapped = true;
+            let flapping = true;
+            let currFlapStep = flapSteps - 1;
+        }
+
+        // check if player released the flap key
+        if (flapped & (key = 0)) {
+            let flapped = false;
+        }
+
+        // currently falling
+        if (~flapping) {
+            let delta = downValues[currFlapStep];
+            let currFlapStep = currFlapStep + 1;
+
+            if (currFlapStep = flapSteps) {
+                let currFlapStep = flapSteps - 1;
+            }
+        }
+
+        // currently flapping
+        if (flapping) {
+            let delta = flapValues[currFlapStep];
+            let currFlapStep = currFlapStep - 1;
+
+            if (currFlapStep < 0) {
+                let currFlapStep = 0;
+                let flapping = false;
+            }
+        }
+
+        // check if new pos will hit ceiling
+        if ((yPos + delta) < 0) {
+            return false;
+        }
+
+        // check if new pos will hit ground
+        if ((yPos + height + delta) > 255) {
+            return false;
+        }
+
+        do erase();
+
+        let yPos = yPos + delta;
+
+        do draw();
+
+        return true;
+    }
+
+    /** Erases the bird from the screen */
+    method void erase() {
+        var int memAddress;
+
+        let memAddress = 16384 + (yPos * 32) + xPos;
+
+        do Memory.poke(memAddress + 0,   0);
+        do Memory.poke(memAddress + 1,   0);
+        do Memory.poke(memAddress + 32,  0);
+        do Memory.poke(memAddress + 33,  0);
+
+        do Memory.poke(memAddress + 64,  0);
+        do Memory.poke(memAddress + 65,  0);
+        do Memory.poke(memAddress + 96,  0);
+        do Memory.poke(memAddress + 97,  0);
+
+        do Memory.poke(memAddress + 128, 0);
+        do Memory.poke(memAddress + 129, 0);
+        do Memory.poke(memAddress + 160, 0);
+        do Memory.poke(memAddress + 161, 0);
+
+        do Memory.poke(memAddress + 192, 0);
+        do Memory.poke(memAddress + 193, 0);
+        do Memory.poke(memAddress + 224, 0);
+        do Memory.poke(memAddress + 225, 0);
+
+        do Memory.poke(memAddress + 256, 0);
+        do Memory.poke(memAddress + 257, 0);
+        do Memory.poke(memAddress + 288, 0);
+        do Memory.poke(memAddress + 289, 0);
+
+        do Memory.poke(memAddress + 320, 0);
+        do Memory.poke(memAddress + 321, 0);
+        do Memory.poke(memAddress + 352, 0);
+        do Memory.poke(memAddress + 353, 0);
+
+        do Memory.poke(memAddress + 384, 0);
+        do Memory.poke(memAddress + 385, 0);
+        do Memory.poke(memAddress + 416, 0);
+        do Memory.poke(memAddress + 417, 0);
+
+        do Memory.poke(memAddress + 448, 0);
+        do Memory.poke(memAddress + 449, 0);
+        do Memory.poke(memAddress + 480, 0);
+        do Memory.poke(memAddress + 481, 0);
+
+        do Memory.poke(memAddress + 512, 0);
+        do Memory.poke(memAddress + 513, 0);
+        do Memory.poke(memAddress + 544, 0);
+        do Memory.poke(memAddress + 545, 0);
+
+        do Memory.poke(memAddress + 576, 0);
+        do Memory.poke(memAddress + 577, 0);
+        do Memory.poke(memAddress + 608, 0);
+        do Memory.poke(memAddress + 609, 0);
+
+        do Memory.poke(memAddress + 640, 0);
+        do Memory.poke(memAddress + 641, 0);
+        do Memory.poke(memAddress + 672, 0);
+        do Memory.poke(memAddress + 673, 0);
+
+        do Memory.poke(memAddress + 704, 0);
+        do Memory.poke(memAddress + 705, 0);
+        do Memory.poke(memAddress + 736, 0);
+        do Memory.poke(memAddress + 737, 0);
+
+        return;
+    }
+
+    /** Draws the bird on the screen */
+    method void draw() {
+        var int memAddress;
+
+        let memAddress = 16384 + (yPos * 32) + xPos;
+
+        do Memory.poke(memAddress + 0,   -256);
+        do Memory.poke(memAddress + 1,   63);
+        do Memory.poke(memAddress + 32,  -256);
+        do Memory.poke(memAddress + 33,  63);
+
+        do Memory.poke(memAddress + 64,  768);
+        do Memory.poke(memAddress + 65,  204);
+        do Memory.poke(memAddress + 96,  768);
+        do Memory.poke(memAddress + 97,  204);
+
+        do Memory.poke(memAddress + 128, 192);
+        do Memory.poke(memAddress + 129, 771);
+        do Memory.poke(memAddress + 160, 192);
+        do Memory.poke(memAddress + 161, 771);
+
+        do Memory.poke(memAddress + 192, 240);
+        do Memory.poke(memAddress + 193, 3267);
+        do Memory.poke(memAddress + 224, 240);
+        do Memory.poke(memAddress + 225, 3267);
+
+        do Memory.poke(memAddress + 256, 783);
+        do Memory.poke(memAddress + 257, 3267);
+        do Memory.poke(memAddress + 288, 783);
+        do Memory.poke(memAddress + 289, 3267);
+
+        do Memory.poke(memAddress + 320, 3075);
+        do Memory.poke(memAddress + 321, 3084);
+        do Memory.poke(memAddress + 352, 3075);
+        do Memory.poke(memAddress + 353, 3084);
+
+        do Memory.poke(memAddress + 384, 3075);
+        do Memory.poke(memAddress + 385, 16368);
+        do Memory.poke(memAddress + 416, 3075);
+        do Memory.poke(memAddress + 417, 16368);
+
+        do Memory.poke(memAddress + 448, 780);
+        do Memory.poke(memAddress + 449, -16372);
+        do Memory.poke(memAddress + 480, 780);
+        do Memory.poke(memAddress + 481, -16372);
+
+        do Memory.poke(memAddress + 512, 240);
+        do Memory.poke(memAddress + 513, 16323);
+        do Memory.poke(memAddress + 544, 240);
+        do Memory.poke(memAddress + 545, 16323);
+
+        do Memory.poke(memAddress + 576, 192);
+        do Memory.poke(memAddress + 577, 12300);
+        do Memory.poke(memAddress + 608, 192);
+        do Memory.poke(memAddress + 609, 12300);
+
+        do Memory.poke(memAddress + 640, 3840);
+        do Memory.poke(memAddress + 641, 16368);
+        do Memory.poke(memAddress + 672, 3840);
+        do Memory.poke(memAddress + 673, 16368);
+
+        do Memory.poke(memAddress + 704, -16384);
+        do Memory.poke(memAddress + 705, 15);
+        do Memory.poke(memAddress + 736, -16384);
+        do Memory.poke(memAddress + 737, 15);
+
+        return;
+    }
+
+    /** Disposes the bird and its resources */
+    method void dispose() {
+        do Memory.deAlloc(downValues);
+        do Memory.deAlloc(flapValues);
+        do Memory.deAlloc(this);
+        return;
+    }
+}

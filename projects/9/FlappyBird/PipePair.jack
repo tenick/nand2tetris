@@ -1,0 +1,205 @@
+/**
+ * Represents a pair of pipes with a vertical gap that the bird must pass through.
+ * Pipe pairs move horizontally and are linked together to continuously spawn
+ * pipes as they enter and leave the scene.
+ */
+class PipePair {
+    field int xPos;                 // Horizontal position of the pipe pair
+    field int gapYPos;              // Vertical position of the top of the gap
+    field int width;                // Width of the pipes
+    field int gapSize;              // Vertical size of the gap between pipes
+    field int pipeLipSize;          // Width of the protruding pipe lips
+    field int spacing;              // Horizontal distance between consecutive pipe pairs
+    field bool isPassed;            // Whether the bird has passed this pipe pair
+    field PipePair nextPipePair;    // Next pipe pair in the linked list
+
+    constructor PipePair new(int gapSizeParam) {
+        do reset(gapSizeParam, true, 0);
+        return this;
+    }
+
+    /** Resets the pipe pair's position and state */
+    method void reset(int gapSizeParam, bool inCtor, int offset) {
+        // gapSize + pipeLipSize*2 < 256
+        // gapYPos should be in range [pipeLipSize, 256-gapSize-pipeLipSize)
+
+        // width and xPos is more permissive (via Math.min/max())
+        // this is to ensure smooth scrolling of pipes into and out of the scene
+
+        let width = 40;
+        let gapSize = gapSizeParam;
+        let pipeLipSize = 5;
+        if (inCtor) {
+            let xPos = 512+pipeLipSize;
+        }
+        else {
+            if (offset < 0) {
+                let offset = 512+pipeLipSize-xPos;
+            }
+            let xPos = xPos + offset;
+            if (~(nextPipePair = null)) {
+                do nextPipePair.reset(gapSizeParam, false, offset);
+            }
+        }
+        let spacing = 190;
+        let gapYPos = LCGRandom.randRange(pipeLipSize, 256-gapSize-pipeLipSize-1);
+        let isPassed = false;
+
+        return;
+    }
+
+    /** Returns the next pipe pair in the linked list */
+    method PipePair getNext() {
+        return nextPipePair;
+    }
+
+    /** Returns true if the pipe pair has moved completely out of the scene */
+    method bool isOutOfScene() {
+        return (xPos + width + pipeLipSize) < 0;
+    }
+
+    /** Moves the pipe pair one pixel to the left and spawns the next pipe if needed */
+    method void moveLeft() {
+        let xPos = xPos - 1;
+
+        // new pipe should be added to its right,
+        // if and only if:
+        // this is the last pipe in the scene
+        // and current position < 512-spacing
+        if ((nextPipePair = null) & (xPos < (512-spacing))) {
+            let nextPipePair = PipePair.new(gapSize);
+        }
+
+        do draw();
+
+        return;
+    }
+
+    /** Updates the pipe pair's horizontal pixels by drawing its left edge and erasing its right edge */
+    method void draw() {
+        // draw
+        do Screen.setColor(true);
+        // top pipe
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos)),
+            0, 
+            Math.max(0, Math.min(511, xPos)),
+            gapYPos-pipeLipSize);
+        // top pipe lip
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos-pipeLipSize)),
+            gapYPos-pipeLipSize, 
+            Math.max(0, Math.min(511, xPos-pipeLipSize)),
+            gapYPos);
+
+        // bottom pipe
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos)),
+            gapYPos+gapSize+pipeLipSize, 
+            Math.max(0, Math.min(511, xPos)),
+            255);
+        // bottom pipe lip
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos-pipeLipSize)),
+            gapYPos+gapSize, 
+            Math.max(0, Math.min(511, xPos-pipeLipSize)),
+            gapYPos+gapSize+pipeLipSize);
+
+        // erase
+        do Screen.setColor(false);
+        // top pipe
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos+width)),
+            0, 
+            Math.max(0, Math.min(511, xPos+width)),
+            gapYPos-pipeLipSize);
+        // top pipe lip
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos+width+pipeLipSize)),
+            gapYPos-pipeLipSize, 
+            Math.max(0, Math.min(511, xPos+width+pipeLipSize)),
+            gapYPos);
+
+        // bottom pipe
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos+width)),
+            gapYPos+gapSize+pipeLipSize, 
+            Math.max(0, Math.min(511, xPos+width)),
+            255);
+        // bottom pipe lip
+        do Screen.drawRectangle(
+            Math.max(0, Math.min(511, xPos+width+pipeLipSize)),
+            gapYPos+gapSize, 
+            Math.max(0, Math.min(511, xPos+width+pipeLipSize)),
+            gapYPos+gapSize+pipeLipSize);
+        return;
+    }
+
+    /** Returns true if the given bounds are colliding with any part of the pipes */
+    method bool isCollidingWith(int ax, int ay, int aw, int ah) {
+        // top pipe
+        if (Utils.areBoundsIntersecting(ax, ay, aw, ah,
+                Math.max(0, Math.min(511, xPos)),
+                0, 
+                Math.max(0, Math.min(511, width)),
+                gapYPos-pipeLipSize)) {
+            return true;
+        }
+
+        // top pipe lip
+        if (Utils.areBoundsIntersecting(ax, ay, aw, ah,
+                Math.max(0, Math.min(511, xPos-pipeLipSize)),
+                gapYPos-pipeLipSize, 
+                Math.max(0, Math.min(511, pipeLipSize*2+width)),
+                pipeLipSize)) {
+            return true;
+        }
+
+        // bottom pipe
+        if (Utils.areBoundsIntersecting(ax, ay, aw, ah,
+                Math.max(0, Math.min(511, xPos)),
+                gapYPos+gapSize+pipeLipSize, 
+                Math.max(0, Math.min(511, width)),
+                255-gapYPos-gapSize-pipeLipSize)) {
+            return true;
+        }
+
+        // bottom pipe lip
+        if (Utils.areBoundsIntersecting(ax, ay, aw, ah,
+                Math.max(0, Math.min(511, xPos-pipeLipSize)),
+                gapYPos+gapSize, 
+                Math.max(0, Math.min(511, pipeLipSize*2+width)),
+                pipeLipSize)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Returns whether the pipe pair has been passed */
+    method bool isPassed() { return isPassed; }
+
+    /** Set the pipe pair's passed state */
+    method void setIsPassed(bool passed) { 
+        let isPassed = passed;
+        return;
+    }
+
+    /** Returns true if the given bounds have passed through the pipe gap */
+    method bool isGapPassed(int ax, int ay, int aw, int ah) {
+        if (Utils.areBoundsIntersecting(ax, ay, aw, ah,
+                Math.max(0, Math.min(511, xPos+width-(width/4))),
+                gapYPos, 
+                width/4, gapSize)) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Severs its link to the next pair first (if it has), then disposes the pipe pair */
+    method void dispose() {
+        let nextPipePair = null;
+        do Memory.deAlloc(this);
+        return;
+    }
+}
