@@ -3,9 +3,10 @@
  * Handles game updates, collision detection, scoring, and resetting.
  */
 class FlappyBirdGame {
-    field PipePair firstPipePair;
-    field Bird bird;
-    field int gapSize, score;
+    field PipePair firstPipePair;   // First pipe pair in the linked list
+    field Bird bird;                // Player-controlled bird
+    field int gapSize;              // Vertical size of the pipe gap
+    field int score;                // Current player score
 
     constructor FlappyBirdGame new(int gapSizeParam) {
         let firstPipePair = PipePair.new(gapSizeParam);
