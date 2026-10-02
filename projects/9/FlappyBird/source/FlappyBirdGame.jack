@@ -32,7 +32,7 @@ class FlappyBirdGame {
     }
 
     /** Runs one game update and returns false if the game has ended */
-    method bool run() {
+    method boolean run() {
         // 1. move and draw the pipes
         do movePipes();
 
@@ -57,7 +57,7 @@ class FlappyBirdGame {
     }
 
     /** Moves all pipe pairs and removes pipes that have left the scene */
-    method bool movePipes() {
+    method boolean movePipes() {
         var PipePair currPipe, toDispose;
 
         let currPipe = firstPipePair;
@@ -78,7 +78,7 @@ class FlappyBirdGame {
     }
 
     /** Returns true if the bird is colliding with a pipe that has not yet been passed */
-    method bool isBirdCollidingWithPipes() {
+    method boolean isBirdCollidingWithPipes() {
         var PipePair currPipe;
 
         let currPipe = firstPipePair;
@@ -101,7 +101,7 @@ class FlappyBirdGame {
     }
 
     /** Checks whether the bird has passed the next unpassed pipe and updates the score */
-    method bool didBirdPassPipePair() {
+    method boolean didBirdPassPipePair() {
         var PipePair currPipe;
 
         let currPipe = firstPipePair;

@@ -10,7 +10,7 @@ class PipePair {
     field int gapSize;              // Vertical size of the gap between pipes
     field int pipeLipSize;          // Width of the protruding pipe lips
     field int spacing;              // Horizontal distance between consecutive pipe pairs
-    field bool isPassed;            // Whether the bird has passed this pipe pair
+    field boolean isPassed;         // Whether the bird has passed this pipe pair
     field PipePair nextPipePair;    // Next pipe pair in the linked list
 
     constructor PipePair new(int gapSizeParam) {
@@ -19,7 +19,7 @@ class PipePair {
     }
 
     /** Resets the pipe pair's position and state */
-    method void reset(int gapSizeParam, bool inCtor, int offset) {
+    method void reset(int gapSizeParam, boolean inCtor, int offset) {
         // gapSize + pipeLipSize*2 < 256
         // gapYPos should be in range [pipeLipSize, 256-gapSize-pipeLipSize)
 
@@ -54,7 +54,7 @@ class PipePair {
     }
 
     /** Returns true if the pipe pair has moved completely out of the scene */
-    method bool isOutOfScene() {
+    method boolean isOutOfScene() {
         return (xPos + width + pipeLipSize) < 0;
     }
 
@@ -136,7 +136,7 @@ class PipePair {
     }
 
     /** Returns true if the given bounds are colliding with any part of the pipes */
-    method bool isCollidingWith(int ax, int ay, int aw, int ah) {
+    method boolean isCollidingWith(int ax, int ay, int aw, int ah) {
         // top pipe
         if (Utils.areBoundsIntersecting(ax, ay, aw, ah,
                 Math.max(0, Math.min(511, xPos)),
@@ -177,16 +177,16 @@ class PipePair {
     }
 
     /** Returns whether the pipe pair has been passed */
-    method bool isPassed() { return isPassed; }
+    method boolean isPassed() { return isPassed; }
 
     /** Set the pipe pair's passed state */
-    method void setIsPassed(bool passed) { 
+    method void setIsPassed(boolean passed) { 
         let isPassed = passed;
         return;
     }
 
     /** Returns true if the given bounds have passed through the pipe gap */
-    method bool isGapPassed(int ax, int ay, int aw, int ah) {
+    method boolean isGapPassed(int ax, int ay, int aw, int ah) {
         if (Utils.areBoundsIntersecting(ax, ay, aw, ah,
                 Math.max(0, Math.min(511, xPos+width-(width/4))),
                 gapYPos, 

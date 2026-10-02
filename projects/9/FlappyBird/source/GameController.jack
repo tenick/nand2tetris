@@ -18,7 +18,7 @@ class GameController {
     /** Runs the main game loop and handles menus, difficulty selection, and game restarts */
     method void gameLoop() {
         var char key;
-        var bool quit, chooseDiff;
+        var boolean quit, chooseDiff;
 
         // Start screen
         do drawStartScreen();

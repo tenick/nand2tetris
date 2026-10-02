@@ -8,8 +8,8 @@ class Bird {
     field int height;           // Bird height in screen pixels
     field int currFlapStep;     // Current movement step
     field int flapSteps;        // Total movement steps
-    field bool flapped;         // Whether the flap key is held
-    field bool flapping;        // Whether the bird is currently flapping
+    field boolean flapped;      // Whether the flap key is held
+    field boolean flapping;     // Whether the bird is currently flapping
     field Array downValues;     // Movement values while falling
     field Array flapValues;     // Movement values while flapping
 
@@ -91,7 +91,7 @@ class Bird {
     method int getHeight() { return height; }
 
     /** Moves the bird. Returns true if didn't hit ceiling or ground, otherwise returns false */
-    method bool move() {
+    method boolean move() {
         var int delta;
         var char key;
 
